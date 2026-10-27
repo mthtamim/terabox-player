@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TeraPlayer – Online TeraBox Video Player & Fast Downloader</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="description" content="Watch TeraBox videos directly in browser without installing apps. High-speed streaming & direct downloads." />
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Plyr Video Player CSS -->
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            accent: {
+              400: '#38bdf8',
+              500: '#0ea5e9',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- Background decorative glows -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[450px] bg-gradient-to-tr from-brand-600/25 to-accent-500/20 rounded-full blur-[130px]"></div>
+    <div class="absolute top-[40%] -right-40 w-[400px] h-[400px] bg-brand-500/10 rounded-full blur-[100px]"></div>
+    <div class="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-accent-500/10 rounded-full blur-[100px]"></div>
+  </div>
+
+  <!-- Navbar -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2.5 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-play text-white text-base ml-0.5"></i>
+        </div>
+        <div>
+          <span class="font-display font-bold text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">TeraPlayer</span>
+          <span class="hidden sm:inline-block text-[10px] font-semibold uppercase tracking-wider ml-1 px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-400 border border-brand-500/30">Pro</span>
+        </div>
+      </a>
+
+      <div class="flex items-center gap-3">
+        <!-- Cookie Status Badge -->
+        <div id="statusBadge" class="hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="statusText">System Ready</span>
+        </div>
+
+        <!-- Settings Button -->
+        <button id="openSettingsBtn" class="flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white transition-colors" title="Cookie & Server Settings">
+          <i class="fa-solid fa-gear text-slate-400"></i>
+          <span>Settings</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-5xl mx-auto px-4 py-8 sm:py-12 w-full flex flex-col items-center">
+
+    <!-- Hero Title -->
+    <div class="text-center max-w-2xl mb-8 sm:mb-10">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-brand-500/10 to-accent-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold mb-4">
+        <i class="fa-solid fa-bolt text-xs"></i> 100% Free & No App Installation Needed
+      </div>
+      <h1 class="font-display font-extrabold text-3xl sm:text-5xl tracking-tight text-white leading-tight">
+        Play & Download <br />
+        <span class="bg-gradient-to-r from-brand-400 via-accent-400 to-brand-300 bg-clip-text text-transparent">TeraBox Videos</span> Instantly
+      </h1>
+      <p class="mt-3 text-sm sm:text-base text-slate-400">
+        Paste any TeraBox share link to stream in high quality or download directly to your device with maximum speed.
+      </p>
+    </div>
+
+    <!-- Link Input Card -->
+    <div class="w-full max-w-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-2 sm:p-3 rounded-2xl shadow-2xl shadow-black/40">
+      <form id="urlForm" class="flex flex-col sm:flex-row gap-2">
+        <div class="relative flex-1 flex items-center">
+          <i class="fa-solid fa-link absolute left-4 text-slate-500"></i>
+          <input
+            type="url"
+            id="urlInput"
+            placeholder="Paste TeraBox link here (terabox.com, 1024tera.com...)"
+            required
+            autocomplete="off"
+            class="w-full pl-11 pr-20 py-3.5 bg-slate-950/60 border border-slate-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 rounded-xl text-sm sm:text-base text-white placeholder-slate-500 outline-none transition-all"
+          />
+          <div class="absolute right-2 flex items-center gap-1">
+            <button
+              type="button"
+              id="clearBtn"
+              class="hidden text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800/80 text-xs transition"
+              title="Clear"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+            <button
+              type="button"
+              id="pasteBtn"
+              class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg border border-slate-700/60 transition flex items-center gap-1"
+              title="Paste from clipboard"
+            >
+              <i class="fa-regular fa-clipboard"></i> Paste
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          id="submitBtn"
+          class="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-brand-600 to-accent-500 hover:from-brand-500 hover:to-accent-400 text-white font-semibold rounded-xl shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+        >
+          <span id="btnText">Play Video</span>
+          <i id="btnIcon" class="fa-solid fa-play text-xs"></i>
+          <span id="btnLoader" class="hidden animate-spin"><i class="fa-solid fa-circle-notch"></i></span>
+        </button>
+      </form>
+
+      <!-- Supported Domains & Quick Actions -->
+      <div class="mt-3 pt-2.5 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+        <div class="flex items-center gap-1.5">
+          <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+          <span>Supports: terabox.com, 1024tera, terafileshare & all mirrors</span>
+        </div>
+        <button type="button" id="demoLinkBtn" class="text-brand-400 hover:text-brand-300 font-medium hover:underline flex items-center gap-1">
+          <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Try Sample Link
+        </button>
+      </div>
+    </div>
+
+    <!-- Bangla help card — উন্নতি: বাংলায় ৩ ধাপ + গোপনীয়তা নোট -->
+    <div lang="bn" class="w-full max-w-2xl mt-4 p-4 rounded-xl bg-slate-900/80 border border-slate-800 text-sm text-slate-300">
+      <div class="font-semibold text-white mb-1">কীভাবে ব্যবহার করবেন</div>
+      <ol class="list-decimal list-inside space-y-1 text-slate-400">
+        <li>TeraBox থেকে শেয়ার লিংক কপি করুন।</li>
+        <li>উপরে পেস্ট করে Play Video চাপুন।</li>
+        <li>ভিডিও চললে ডাউনলোড বোতামে ডাউনলোড করুন, ফোল্ডার হলে নিচের তালিকা থেকে ফাইল বেছে নিন।</li>
+      </ol>
+      <p class="mt-2 text-xs text-slate-500">নোট: ndus কুকি দেওয়া ঐচ্ছিক। Settings-এ দেওয়া ndus শুধু সার্ভার চলাকালীন মেমোরিতে থাকে, .env ফাইলে লেখা হয় না। ndus ছাড়া চললে সাইটটি অন্য একটি প্রক্সি ব্যবহার করতে পারে, তাই পার্সোনাল লিংকের ক্ষেত্রে সেটা মনে রাখবেন।</p>
+    </div>
+
+    <!-- Error Message Banner -->
+    <div id="errorAlert" class="hidden w-full max-w-2xl mt-4 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-start gap-3">
+      <i class="fa-solid fa-triangle-exclamation text-rose-400 mt-0.5 text-base"></i>
+      <div class="flex-1">
+        <div class="font-semibold" id="errorTitle">Process Error</div>
+        <div class="text-xs text-rose-300/80 mt-0.5" id="errorDesc">Could not resolve the video link.</div>
+      </div>
+      <button onclick="document.getElementById('errorAlert').classList.add('hidden')" class="text-rose-400 hover:text-rose-200">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Player & Media Section (Hidden until link resolved) -->
+    <section id="mediaSection" class="hidden w-full max-w-3xl mt-8">
+      <!-- Video Container Card -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+        
+        <!-- Video Header Info -->
+        <div class="p-4 sm:p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-lg bg-brand-500/10 border border-brand-500/30 flex items-center justify-center shrink-0 text-brand-400">
+              <i class="fa-solid fa-film text-lg"></i>
+            </div>
+            <div>
+              <h2 id="videoTitle" class="font-display font-semibold text-base sm:text-lg text-white line-clamp-1">Video Title</h2>
+              <div class="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
+                <span id="videoSize"><i class="fa-solid fa-hard-drive mr-1"></i>0 MB</span>
+                <span id="streamTypeBadge" class="px-2 py-0.5 rounded bg-accent-500/20 text-accent-300 font-medium">Direct Proxy</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stream Mode Toggle -->
+          <div class="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 self-start sm:self-auto text-xs">
+            <button id="modeDirectBtn" class="px-3 py-1.5 rounded-lg bg-accent-500 text-white font-medium transition">
+              <i class="fa-solid fa-video mr-1"></i> Direct Stream
+            </button>
+            <button id="modeHlsBtn" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
+              <i class="fa-solid fa-bolt mr-1"></i> Fast HLS
+            </button>
+          </div>
+        </div>
+
+        <!-- Video Player Element -->
+        <div id="playerWrap" class="relative bg-black aspect-video flex items-center justify-center overflow-hidden">
+          <video id="player" playsinline controls preload="auto" class="w-full h-full"></video>
+          <!-- Double-tap seek indicators (pointer-events none, JS shows them) -->
+          <div id="dtLeft" class="dt-indicator left"><i class="fa-solid fa-backward"></i><span>-10s</span></div>
+          <div id="dtRight" class="dt-indicator right"><i class="fa-solid fa-forward"></i><span>+10s</span></div>
+          <div id="dtCenter" class="dt-indicator center"><i class="fa-solid fa-play"></i><span id="dtCenterText">Play</span></div>
+        </div>
+
+        <!-- Real-player style extra controls: big seek / play / speed buttons -->
+        <div class="p-3 sm:p-4 bg-slate-950/60 border-b border-slate-800 flex items-center justify-center gap-2 sm:gap-3">
+          <button id="seekBackBtn" class="player-extra-btn" title="10 সেকেন্ড পেছনে"><i class="fa-solid fa-rotate-left"></i><span>-10s</span></button>
+          <button id="playPauseBtn" class="player-extra-btn" title="Play / Pause" style="min-width:64px;background:#4f46e5;border-color:#6366f1;"><i id="playPauseIcon" class="fa-solid fa-play"></i><span>Play</span></button>
+          <button id="seekFwdBtn" class="player-extra-btn" title="10 সেকেন্ড সামনে"><i class="fa-solid fa-rotate-right"></i><span>+10s</span></button>
+          <button id="speedBtn" class="player-extra-btn" title="Playback speed"><i class="fa-solid fa-gauge-high"></i><span id="speedLabel">1x</span></button>
+          <button id="seekBarHint" class="player-extra-btn" title="Double-tap seek" style="min-width:88px;"><i class="fa-solid fa-hand-pointer"></i><span>ডাবল-ট্যাপ: ±10s</span></button>
+        </div>
+
+        <!-- Action Buttons (Download, Copy, Share) -->
+        <div class="p-4 sm:p-5 bg-slate-900/60 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Direct Download Button -->
+            <a
+              id="downloadBtn"
+              href="#"
+              download
+              class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-emerald-600/20 transition flex items-center gap-2"
+            >
+              <i class="fa-solid fa-cloud-arrow-down"></i>
+              <span>Download File</span>
+            </a>
+
+            <!-- Copy Link Button -->
+            <button
+              id="copyLinkBtn"
+              class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200 text-xs sm:text-sm font-medium transition flex items-center gap-1.5"
+            >
+              <i class="fa-regular fa-copy"></i>
+              <span>Copy Link</span>
+            </button>
+          </div>
+
+          <!-- Share / Open original -->
+          <div class="flex items-center gap-2">
+            <button
+              id="fullscreenBtn"
+              class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white text-xs sm:text-sm transition"
+              title="Fullscreen"
+            >
+              <i class="fa-solid fa-expand"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Multiple Files List (If folder or multiple items) -->
+      <div id="multiFilesContainer" class="hidden mt-6 bg-slate-900/90 border border-slate-800 rounded-2xl p-5">
+        <h3 class="font-display font-semibold text-sm sm:text-base text-white mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-folder-open text-brand-400"></i>
+          <span>Folder Contents (<span id="fileCount">0</span> files)</span>
+        </h3>
+        <div id="fileList" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+          <!-- Dynamically inserted files -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent History Section -->
+    <section id="historySection" class="w-full max-w-3xl mt-12">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-display font-semibold text-lg text-white flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-brand-400 text-base"></i>
+          <span>Recently Played</span>
+        </h3>
+        <button id="clearHistoryBtn" class="text-xs text-slate-500 hover:text-rose-400 transition hidden">
+          Clear History
+        </button>
+      </div>
+
+      <div id="historyList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- Dynamically filled with localStorage history -->
+      </div>
+      <div id="emptyHistory" class="text-center py-8 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs">
+        No recent videos yet. Paste a link above to start watching!
+      </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="w-full max-w-4xl mt-16 grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div class="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80">
+        <div class="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center mb-3">
+          <i class="fa-solid fa-bolt text-lg"></i>
+        </div>
+        <h4 class="font-display font-semibold text-white text-base">Zero Buffering</h4>
+        <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+          High-performance HLS multi-server streaming with adaptive bitrate streaming ensures smooth playback without stuttering.
+        </p>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80">
+        <div class="w-10 h-10 rounded-xl bg-accent-500/10 border border-accent-500/20 text-accent-400 flex items-center justify-center mb-3">
+          <i class="fa-solid fa-shield-halved text-lg"></i>
+        </div>
+        <h4 class="font-display font-semibold text-white text-base">No App, No Ads</h4>
+        <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+          Stream directly inside your mobile or computer browser without installing suspicious apps or dealing with intrusive popups.
+        </p>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3">
+          <i class="fa-solid fa-cloud-arrow-down text-lg"></i>
+        </div>
+        <h4 class="font-display font-semibold text-white text-base">Direct Fast Download</h4>
+        <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+          Bypasses TeraBox limits to provide direct download connections so you can save videos offline in original full quality.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 flex items-center justify-center">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <h3 class="font-display font-bold text-lg text-white">System Settings</h3>
+        </div>
+        <button id="closeSettingsBtn" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="py-5 space-y-4 text-xs sm:text-sm">
+        <div>
+          <label class="block font-medium text-slate-300 mb-1.5">
+            TeraBox Account Cookie (<code class="text-brand-400 font-mono">ndus</code>)
+          </label>
+          <input
+            type="text"
+            id="ndusInput"
+            placeholder="e.g. YdPCtvYteHui3XC6demNk-M2HgRzVrnh0txZQG6X"
+            class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl text-white outline-none font-mono text-xs"
+          />
+          <p class="text-[11px] text-slate-400 mt-1">
+            Setting your own <code class="text-slate-300">ndus</code> cookie ensures 100% bypass without rate limits or bot verification.
+          </p>
+        </div>
+
+        <!-- How to get ndus cookie instructions -->
+        <div class="p-3.5 bg-slate-950/80 border border-slate-800/80 rounded-xl space-y-2 text-xs">
+          <div class="font-semibold text-slate-200 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info text-brand-400"></i> How to get your free NDUS cookie:
+          </div>
+          <ol class="list-decimal list-inside space-y-1 text-slate-400 text-[11px] leading-relaxed">
+            <li>Log in to <a href="https://www.terabox.com" target="_blank" class="text-brand-400 underline">terabox.com</a> in your browser.</li>
+            <li>Press <kbd class="px-1 py-0.5 bg-slate-800 rounded text-slate-300">F12</kbd> (Inspect) &rarr; Go to <strong>Application</strong> or <strong>Storage</strong> tab.</li>
+            <li>Click <strong>Cookies</strong> &rarr; Select <code class="text-slate-300">https://terabox.com</code>.</li>
+            <li>Find the cookie named <strong class="text-white font-mono">ndus</strong>, copy its value and paste it above!</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex items-center justify-end gap-2">
+        <button id="cancelSettingsBtn" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium">
+          Cancel
+        </button>
+        <button id="saveSettingsBtn" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-lg shadow-brand-500/20">
+          Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2.5 px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl text-xs sm:text-sm text-white">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+    <span id="toastMsg">Success</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-auto border-t border-slate-800/60 bg-slate-950/40 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="font-display font-semibold text-slate-400">TeraPlayer</span>
+        <span>&bull;</span>
+        <span>Online Video Player & Downloader</span>
+      </div>
+      <div>
+        Disclaimer: This tool does not host any media files. All streams are routed from public cloud providers.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts: Hls.js, Plyr.js, Custom App JS -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
